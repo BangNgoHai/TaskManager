@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:8000' });
+const API = axios.create({ 
+  baseURL: 'https://taskmanager-backend-tl5t.onrender.com' 
+});
 
 // Function to get the token from localStorage
 const getToken = () => localStorage.getItem('token');
