@@ -21,7 +21,7 @@ app.use('/v1/user', userRoute);
 //MONGOOSE CONNECTION
 const startServer = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URL);
+        await mongoose.connect(process.env.DB_URL);
         console.log("Connected to MongoDB");
 
         app.listen(8000, () => {

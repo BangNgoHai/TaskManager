@@ -1,31 +1,43 @@
 import { useState, useEffect } from 'react';
 import TaskList from './components/TaskList';
 import TaskForm from './components/TaskForm';
+import Login from './components/Login';
+import { getTasks, createTask, updateTask, deleteTask } from './services/api';
 import './App.css';
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState({ id: null, title: '', description: '', deadline: '', status: 'pending' });
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const storedTasks = JSON.parse(localStorage.getItem('tasks'));
-    if (storedTasks) {
-      setTasks(storedTasks);
+    if (token) {
+      const fetchTasks = async () => {
+        try {
+          const { data } = await getTasks(token);
+          setTasks(data);
+        } catch (error) {
+          console.error('Error fetching tasks:', error);
+        }
+      };
+      fetchTasks();
     }
-  }, []);
+  }, [token]);
 
-  useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (task.id) {
-      setTasks(tasks.map(t => t.id === task.id ? task : t));
-    } else {
-      setTasks([...tasks, { ...task, id: Date.now() }]);
+    try {
+      if (task.id) {
+        const { data } = await updateTask(task.id, task, token);
+        setTasks(tasks.map(t => (t.id === task.id ? data : t)));
+      } else {
+        const { data } = await createTask(task, token);
+        setTasks([...tasks, data]);
+      }
+      setTask({ id: null, title: '', description: '', deadline: '', status: 'pending' });
+    } catch (error) {
+      console.error('Error saving task:', error);
     }
-    setTask({ id: null, title: '', description: '', deadline: '', status: 'pending' });
   };
 
   const handleEdit = (id) => {
@@ -33,17 +45,40 @@ function App() {
     setTask(taskToEdit);
   };
 
-  const handleDelete = (id) => {
-    setTasks(tasks.filter(t => t.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await deleteTask(id, token);
+      setTasks(tasks.filter(t => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
-  const handleStatusChange = (id, status) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, status } : t));
+  const handleStatusChange = async (id, status) => {
+    try {
+      const { data } = await updateTask(id, { status }, token);
+      setTasks(tasks.map(t => (t.id === id ? data : t)));
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
   };
+
+  const handleLogin = (userToken) => {
+    setToken(userToken);
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+  };
+
+  if (!token) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   return (
     <div className="app-container">
       <h1>Task Management App</h1>
+      <button onClick={handleLogout} className="logout-button">Logout</button>
       <TaskForm handleSubmit={handleSubmit} task={task} setTask={setTask} />
       <TaskList
         tasks={tasks}
