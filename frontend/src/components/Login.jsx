@@ -17,11 +17,11 @@ const Login = ({ onLogin }) => {
     try {
       if (isLogin) {
         const { data } = await login({ username: formData.username, password: formData.password });
-        onLogin(data.token);
+        onLogin(data.accessToken);
       } else {
         await register(formData);
         const { data } = await login({ username: formData.username, password: formData.password });
-        onLogin(data.token);
+        onLogin(data.accessToken);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred.');

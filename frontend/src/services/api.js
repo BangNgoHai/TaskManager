@@ -1,15 +1,26 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+const API = axios.create({ baseURL: 'http://localhost:8000' });
 
-const api = axios.create({
-  baseURL: API_URL,
+// Function to get the token from localStorage
+const getToken = () => localStorage.getItem('token');
+
+// Utility to set the authorization header
+const getAuthHeaders = (token) => ({
+  headers: { 
+    // Backend expects the token in the format: "Bearer <token>"
+    token: `Bearer ${token}` 
+  }
 });
 
-export const register = (userData) => api.post('/auth/register', userData);
-export const login = (credentials) => api.post('/auth/login', credentials);
+// Auth routes
+export const login = (formData) => API.post('/v1/auth/login', formData);
+export const register = (formData) => API.post('/v1/auth/register', formData);
 
-export const getTasks = (token) => api.get('/tasks', { headers: { token: `Bearer ${token}` } });
-export const createTask = (taskData, token) => api.post('/tasks', taskData, { headers: { token: `Bearer ${token}` } });
-export const updateTask = (id, taskData, token) => api.put(`/tasks/${id}`, taskData, { headers: { token: `Bearer ${token}` } });
-export const deleteTask = (id, token) => api.delete(`/tasks/${id}`, { headers: { token: `Bearer ${token}` } });
+// Task routes (using plural /tasks to match backend)
+export const getTasks = (token) => API.get('/v1/tasks', getAuthHeaders(token));
+export const createTask = (taskData, token) => API.post('/v1/tasks', taskData, getAuthHeaders(token));
+export const updateTask = (id, taskData, token) => API.put(`/v1/tasks/${id}`, taskData, getAuthHeaders(token));
+export const deleteTask = (id, token) => API.delete(`/v1/tasks/${id}`, getAuthHeaders(token));
+
+export default API;

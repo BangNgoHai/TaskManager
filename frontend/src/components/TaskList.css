@@ -1,5 +1,13 @@
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+/* Task List Styling */
+.task-list-full {
+  margin-top: 2rem;
+}
+
+.no-tasks-message {
+  text-align: center;
+  color: #888;
+  font-size: 1.1rem;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
 }

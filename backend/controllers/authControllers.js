@@ -65,7 +65,7 @@ const authControllers = {
         return jwt.sign({
             id: user.id,
             admin: user.admin
-        }, process.env.JWT_ACCESS_KEY, {expiresIn: "30s" });
+        }, process.env.JWT_ACCESS_KEY, {expiresIn: "1h" }); // Changed from 30s to 1h
     },
     //GENERATE REFRESH TOKEN  
     generateRefreshToken: (user) => {
@@ -95,6 +95,7 @@ const authControllers = {
                 //use generatefunktion above
                 const accessToken = authControllers.generateAccessToken(user);
                 const refreshToken = authControllers.generateRefreshToken(user);
+                refreshTokens.push(refreshToken);
 
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
@@ -108,7 +109,7 @@ const authControllers = {
             }
 
         } catch (err) {
-            res.status(500).json(err);
+            res.status(500).json({ message: 'An internal server error occurred', details: err.message });
         }
     },
 
@@ -145,7 +146,7 @@ const authControllers = {
         res.clearCookie("refreshToken");
 
         refreshTokens = refreshTokens.filter(token => token !== req.cookies.refreshToken);
-        res.statur(200).json("Logged out successfully");
+        res.status(200).json("Logged out successfully");
     }
 };
 
